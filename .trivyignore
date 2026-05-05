@@ -1,0 +1,16 @@
+# Ignore selected warnings from scanning the official AWS terraform modules
+#
+# Role permits administrative access
+AVD-KSV-0041
+AVD-KSV-0044
+AVD-KSV-0046
+AVD-KSV-0048
+AVD-KSV-0049
+AVD-KSV-01010
+
+# core management runs in psk-system namespace
+AVD-KSV-0113
+AVD-KSV-0110
+
+# pull from trusted registry for lab purposes
+AVD-KSV-0125
