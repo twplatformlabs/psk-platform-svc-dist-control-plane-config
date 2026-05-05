@@ -9,7 +9,6 @@ replicaCount: 2
 # -- Container image
 image:
   repository: ghcr.io/stefanprodan/podinfo
-  tag: ""           # Leave empty — uses Chart appVersion
   pullPolicy: IfNotPresent
 
 # ============================================================
