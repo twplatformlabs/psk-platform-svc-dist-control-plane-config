@@ -88,30 +88,34 @@ workflows:
 
   set sandbox cluster role configuration management:
     jobs:
-      - deploy argocd-core as sandbox configuration manager:
+      - deploy argocd-core as configuration manager:
+          name: deploy sandbox cluster configuration manager
           context: *context
           cluster: sbx-i01-aws-us-east-1
           filters: *on-push-main
 
-      - set cluster role sandbox:
+      - set cluster role:
+          name: set role as sandbox
           context: *context
           cluster: sbx-i01-aws-us-east-1
           cluster-role: sandbox
           requires:
-            - deploy argocd-core as sandbox configuration manager
+            - deploy sandbox cluster configuration manager
           filters: *on-push-main
 
   set production cluster role configuration management:
     jobs:
-      - deploy argocd-core as production configuration manager:
+      - deploy argocd-core as configuration manager:
+          name: deploy production cluster configuration manager
           context: *context
           cluster: prod-i01-aws-us-east-2
           filters: *on-tag-main
 
-      - set cluster role production:
+      - set cluster role:
+          name: set role as production
           context: *context
           cluster: prod-i01-aws-us-east-2
           cluster-role: production
           requires:
-            - deploy argocd-core as production configuration manager
+            - deploy production cluster configuration manager
           filters: *on-tag-main
