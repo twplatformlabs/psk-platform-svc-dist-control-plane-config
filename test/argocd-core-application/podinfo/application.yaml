@@ -4,6 +4,8 @@
   metadata:
     name: podinfo
     namespace: psk-system
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
   spec:
     project: psk-aws-control-plane-configuration
 
