@@ -40,7 +40,7 @@ spec:
       selfHeal: true
 EOF
 
-# kubectl apply -f "tpl/test-configuration.yaml"
+kubectl apply -f "tpl/test-configuration.yaml"
 
 # # wait for the application to be ready
 
