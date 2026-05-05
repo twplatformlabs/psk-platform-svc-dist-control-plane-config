@@ -1,0 +1,32 @@
+  # roles/production/metrics-server/application.yaml
+  apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: podinfo
+    namespace: psk-system
+  spec:
+    project: psk-aws-control-plane-configuration
+
+    sources:
+      - repoURL: oci://ghcr.io/stefanprodan/charts
+        chart: podinfo
+        targetRevision: 6.7.1
+        helm:
+          valueFiles:
+            - $config/podinfo/values.yaml
+      - repoURL: https://github.com/twplatformlabs/psk-platform-avc-dist-control-plane-config/test/argocd-core-application
+        targetRevision: HEAD
+        ref: config
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: psk-system
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+      retry:
+        limit: 5
+        backoff:
+          duration: 30s
+          factor: 2
+          maxDuration: 5m

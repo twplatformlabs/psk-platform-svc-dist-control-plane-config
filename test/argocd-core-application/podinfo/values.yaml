@@ -1,0 +1,140 @@
+# ============================================================
+# podinfo - ArgoCD Functional Testing Deployment
+# https://github.com/stefanprodan/podinfo
+# ============================================================
+
+# -- Number of replicas (>1 tests ArgoCD self-healing)
+replicaCount: 2
+
+# -- Container image
+image:
+  repository: ghcr.io/stefanprodan/podinfo
+  tag: ""           # Leave empty — uses Chart appVersion
+  pullPolicy: IfNotPresent
+
+# ============================================================
+# Application config
+# ============================================================
+podinfo:
+  # Displayed in the UI and /version endpoint — useful for
+  # confirming the correct revision was deployed by ArgoCD
+  message: "ArgoCD health-check app — OK"
+
+  # Background color of the web UI (hex, helps visually
+  # distinguish environments: blue=dev, green=staging, etc.)
+  color: "#4a90e2"
+
+# ============================================================
+# Probes — used by Kubernetes AND ArgoCD health assessment
+# ============================================================
+# podinfo exposes /healthz (liveness) and /readyz (readiness)
+# out of the box; the chart wires these up automatically.
+# Override timing here if your cluster is slow to pull images.
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+# ============================================================
+# Service
+# ============================================================
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9898        # HTTP
+  metricsPort: 9797 # Prometheus /metrics
+  grpcPort: 9999    # gRPC (optional)
+  annotations: {}
+
+# ============================================================
+# Ingress (disable if not needed for initial testing)
+# ============================================================
+ingress:
+  enabled: false
+  # Uncomment and adjust once ingress is configured:
+  # className: nginx
+  # hosts:
+  #   - host: podinfo.example.com
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+
+# ============================================================
+# Resources — small footprint for a test app
+# ============================================================
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+
+# ============================================================
+# Horizontal Pod Autoscaler (optional — tests ArgoCD drift
+# detection if someone manually scales the deployment)
+# ============================================================
+hpa:
+  enabled: false
+  # enabled: true
+  # minReplicas: 2
+  # maxReplicas: 4
+  # cpu: 80
+
+# ============================================================
+# Service Account
+# ============================================================
+serviceAccount:
+  enabled: true
+  name: ""          # Auto-generated if empty
+  annotations: {}   # Add IRSA / Workload Identity here if needed
+
+# ============================================================
+# Pod configuration
+# ============================================================
+podAnnotations:
+  # Tells ArgoCD to include this pod in health rollup
+  argocd.argoproj.io/managed-by: argocd
+
+podLabels:
+  app.kubernetes.io/part-of: argocd-core-functional-test
+
+# ============================================================
+# Security context (good practice even for test workloads)
+# ============================================================
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65534
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# ============================================================
+# Node scheduling
+# ============================================================
+nodeSelector:
+  nodegroup: management-arm-rkt-mng
+
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "management"
+    effect: "NoSchedule"
+affinity: {}
+
+# ============================================================
+# Metrics & Monitoring
+# ============================================================
+serviceMonitor:
+  # Set to true if you have Prometheus Operator installed
+  enabled: false
+  # interval: 15s
+  # additionalLabels:
+  #   release: prometheus
