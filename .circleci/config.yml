@@ -7,7 +7,7 @@ orbs:
 
 globals:
   - &context platform
-  - &executor-image ghcr.io/twplatformlabs/circleci-eks-ops:alpine-2026.04.2
+  - &executor-image ghcr.io/twplatformlabs/circleci-eks-ops:alpine-2026.04.3
 
 on-push-main: &on-push-main
   branches:
@@ -37,7 +37,7 @@ commands:
       - do/bash-functions
 
   integration-test:
-    description: valiadate functional health of argocd-core implementation
+    description: validate functional health of argocd-core implementation
     parameters:
       cluster:
         description: cluster and tf workspace name
