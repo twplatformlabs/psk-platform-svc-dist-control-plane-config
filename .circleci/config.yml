@@ -1,25 +1,25 @@
 version: 2.1
 
 orbs:
-  kube: twdps/kube-ops@1.1.2
+  kube: twdps/kube-ops@2.0.0
   op: twdps/onepassword@3.0.0
-  do: twdps/pipeline-events@5.1.0
+  do: twdps/pipeline-events@5.3.2
 
 globals:
   - &context platform
   - &executor-image ghcr.io/twplatformlabs/circlece-eks-ops:alpine-2026.04.2
 
-# on-push-main: &on-push-main
-#   branches:
-#     only: /main/
-#   tags:
-#     ignore: /.*/
+on-push-main: &on-push-main
+  branches:
+    only: /main/
+  tags:
+    ignore: /.*/
 
-# on-tag-main: &on-tag-main
-#   branches:
-#     ignore: /.*/
-#   tags:
-#     only: /.*/
+on-tag-main: &on-tag-main
+  branches:
+    ignore: /.*/
+  tags:
+    only: /.*/
 
 commands:
 
@@ -60,24 +60,44 @@ jobs:
       - checkout
       - set-environment:
           cluster: << parameters.cluster >>
-      # - run:
-      #     name: deploy argocd-core
-      #     command: scripts/install_argocd_core.sh << parameters.cluster >>
-      # - run:
-      #     name: set the cluster role - connecting to role definition in psk-aws-control-plane-configuration
-      #     command: scripts/set_cluster_role.sh << parameters.cluster >> << parameters.cluster-role >>
+      - run:
+          name: deploy argocd-core
+          command: scripts/install_argocd_core.sh << parameters.cluster >>
+      - run:
+          name: integration test for cluster configuration App definition
+          command: scripts/integration_test.sh << parameters.cluster >>
 
+  set cluster role:
+    docker:
+      - image: *executor-image
+    parameters:
+      cluster:
+        description: cluster to be configured
+        type: string
+      cluster-role:
+        description: cluster role to be configured
+        type: string
+    steps:
+      - checkout
+      - set-environment:
+          cluster: << parameters.cluster >>
+      - run:
+          name: set the cluster role - connecting to role definition in psk-aws-control-plane-configuration
+          command: scripts/set_cluster_role.sh << parameters.cluster >> << parameters.cluster-role >>
 
 workflows:
 
-  set cluster role configuration management:
+  set sandbox cluster role configuration management:
     jobs:
       - deploy argocd-core as configuration manager:
           context: *context
           cluster: sbx-i01-aws-us-east-1
+          filters: *on-push-main
 
-
-      # - set-cluster-role:
-      #     requires:
-      #       - deploy-argocd-code-dist-control-plane-config-manager
-
+      - set cluster role:
+          context: *context
+          cluster: sbx-i01-aws-us-east-1
+          cluster-role: sandbox
+          requires:
+            - deploy argocd-core as configuration manager
+          filters: *on-push-main

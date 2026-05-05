@@ -106,7 +106,6 @@ kubectl rollout status deployment/argocd-redis \
 kubectl rollout status statefulset/argocd-application-controller \
   -n "$argocd_namespace" --timeout=120s || true
 
-
 cat <<EOF > tpl/cluster-configuration-project.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -114,7 +113,7 @@ metadata:
   name: psk-aws-control-plane-configuration
   namespace: $argocd_namespace
 spec:
-  description: Only allows twplatformlabs/psk-aws-control-plane-configuration as source repo.
+  description: dedicated project for cluster configuration project
 
   sourceRepos:
     - https://github.com/twplatformlabs/*
