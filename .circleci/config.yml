@@ -45,7 +45,7 @@ commands:
     steps:
       - run:
           name: run integration tests
-          command: scripts/integration_test.sh << parameters.cluster >>
+          command: bash scripts/integration_test.sh << parameters.cluster >>
 
 jobs:
 
@@ -62,10 +62,9 @@ jobs:
           cluster: << parameters.cluster >>
       - run:
           name: deploy argocd-core
-          command: scripts/install_argocd_core.sh << parameters.cluster >>
-      - run:
-          name: integration test for cluster configuration App definition
-          command: scripts/integration_test.sh << parameters.cluster >>
+          command: bash scripts/install_argocd_core.sh << parameters.cluster >>
+      - integration-test:
+          cluster: << parameters.cluster >>
 
   set cluster role:
     docker:
@@ -83,7 +82,7 @@ jobs:
           cluster: << parameters.cluster >>
       - run:
           name: set the cluster role - connecting to role definition in psk-aws-control-plane-configuration
-          command: scripts/set_cluster_role.sh << parameters.cluster >> << parameters.cluster-role >>
+          command: bash scripts/set_cluster_role.sh << parameters.cluster >> << parameters.cluster-role >>
 
 workflows:
 
