@@ -1,5 +1,6 @@
 notes.md
 source.env
+kubeconfig
 bash-scripts.sh
 tpl/cluster-role-binding.yaml
 tpl/cluster-configuration-project.yaml
