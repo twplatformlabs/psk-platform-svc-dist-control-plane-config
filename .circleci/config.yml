@@ -7,7 +7,7 @@ orbs:
 
 globals:
   - &context platform
-  - &executor-image ghcr.io/twplatformlabs/circlece-eks-ops:alpine-2026.04.2
+  - &executor-image ghcr.io/twplatformlabs/circleci-eks-ops:alpine-2026.04.2
 
 on-push-main: &on-push-main
   branches:
