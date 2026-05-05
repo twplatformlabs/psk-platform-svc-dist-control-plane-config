@@ -116,7 +116,7 @@ spec:
   description: dedicated project for cluster configuration project
 
   sourceRepos:
-    - https://github.com/twplatformlabs/*
+    - "*"
 
   destinations:
     - namespace: "*"

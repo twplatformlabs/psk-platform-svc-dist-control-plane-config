@@ -37,3 +37,4 @@ subjects:
 EOF
 kubectl delete -f tpl/cluster-role-binding.yaml
 kubectl delete -n psk-system --recursive -f "argocd-core-manifest-${argocd_version}/"
+kubectl delete secret argocd-redis -n $argocd_namespace
