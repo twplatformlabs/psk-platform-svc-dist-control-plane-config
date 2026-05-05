@@ -27,7 +27,7 @@ commands:
 
   set-environment:
 
-  deploy-dist-control-plane-config-manager:
+  
 
     scripts:
 
@@ -36,114 +36,31 @@ commands:
 
 
 jobs:
-  install-argo-core:
-    executor: k8s-tools
-    environment:
-      CLUSTER_CONTEXT: << pipeline.parameters.cluster_context >>
-      CLUSTER_ROLE: << pipeline.parameters.cluster_role >>
-      ARGOCD_NAMESPACE: argocd
-      ARGOCD_CHART_VERSION: "7.7.0"
-    steps:
-      - checkout
-      - run:
-          name: Validate parameters
-          command: |
-            if [ -z "$CLUSTER_CONTEXT" ]; then
-              echo "ERROR: cluster_context pipeline parameter is required"
-              exit 1
-            fi
-            if [ -z "$CLUSTER_ROLE" ]; then
-              echo "ERROR: cluster_role pipeline parameter is required"
-              exit 1
-            fi
-            echo "Bootstrapping cluster_context=$CLUSTER_CONTEXT cluster_role=$CLUSTER_ROLE"
-      - run:
-          name: Configure kubeconfig
-          command: |
-            KUBECONFIG_VAR="KUBECONFIG_$(echo "$CLUSTER_CONTEXT" | tr '[:lower:]' '[:upper:]')"
-            KUBECONFIG_DATA="${!KUBECONFIG_VAR}"
-            if [ -z "$KUBECONFIG_DATA" ]; then
-              echo "ERROR: Environment variable $KUBECONFIG_VAR is not set in the CircleCI context"
-              exit 1
-            fi
-            mkdir -p ~/.kube
-            echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
-            chmod 600 ~/.kube/config
-            kubectl cluster-info
-      - run:
-          name: Create argocd namespace
-          command: kubectl apply -f manifests/namespace.yaml
-      - run:
-          name: Add Argo CD Helm repository
-          command: |
-            helm repo add argo https://argoproj.github.io/argo-helm
-            helm repo update
-      - run:
-          name: Install Argo Core
-          command: |
-            helm upgrade --install argo-cd argo/argo-cd \
-              --namespace "$ARGOCD_NAMESPACE" \
-              --version "$ARGOCD_CHART_VERSION" \
-              --values install/argo-core-values.yaml \
-              --wait \
-              --timeout 5m
 
-  deploy-root-app:
-    executor: k8s-tools
-    environment:
-      CLUSTER_CONTEXT: << pipeline.parameters.cluster_context >>
-      CLUSTER_ROLE: << pipeline.parameters.cluster_role >>
-      ARGOCD_NAMESPACE: argocd
-    steps:
-      - checkout
-      - run:
-          name: Install envsubst
-          command: apk add --no-cache gettext
-      - run:
-          name: Configure kubeconfig
-          command: |
-            KUBECONFIG_VAR="KUBECONFIG_$(echo "$CLUSTER_CONTEXT" | tr '[:lower:]' '[:upper:]')"
-            KUBECONFIG_DATA="${!KUBECONFIG_VAR}"
-            if [ -z "$KUBECONFIG_DATA" ]; then
-              echo "ERROR: Environment variable $KUBECONFIG_VAR is not set in the CircleCI context"
-              exit 1
-            fi
-            mkdir -p ~/.kube
-            echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
-            chmod 600 ~/.kube/config
-      - run:
-          name: Configure git repository credentials
-          command: |
-            # Create Argo CD repository secret for the config repo.
-            # Requires ARGOCD_REPO_TOKEN env var in the CircleCI context.
-            # Adjust the secret below to match your authentication method.
-            if [ -n "$ARGOCD_REPO_TOKEN" ]; then
-              kubectl create secret generic argocd-repo-psk-config \
-                --namespace "$ARGOCD_NAMESPACE" \
-                --from-literal=type=git \
-                --from-literal=url=https://github.com/twplatformlabs/psk-aws-control-plane-configuration \
-                --from-literal=password="$ARGOCD_REPO_TOKEN" \
-                --from-literal=username=x-token-auth \
-                --dry-run=client -o yaml \
-              | kubectl label --local -f - \
-                  "argocd.argoproj.io/secret-type=repository" \
-                  --dry-run=client -o yaml \
-              | kubectl apply -f -
-            fi
-      - run:
-          name: Deploy root Application
-          command: |
-            export CLUSTER_ROLE
-            envsubst '$CLUSTER_ROLE' < manifests/root-app.yaml | kubectl apply -f -
-            echo "Root Application deployed for role: $CLUSTER_ROLE"
-            kubectl get application platform-root -n "$ARGOCD_NAMESPACE"
+  deploy-argocd-code-dist-control-plane-config-manager:
+    docker:
+      - image: *executor-image
+    parameters:
+      cluster:
+      cluster-role:
+      steps:
+        - checkout
+        - set-environment:
+        
+  
+      
 
 workflows:
-  bootstrap-cluster:
+
+  deploy argocd core as on-cluster configuration manager:
     jobs:
-      - install-argo-core:
-          context: platform-control-plane
-      - deploy-root-app:
+      - deploy-argocd-code-dist-control-plane-config-manager:
+          context: 
+          cluster:
+          cluster-role:
+          executor-image: *executor-image
+
+      - set-cluster-role:
           requires:
-            - install-argo-core
-          context: platform-control-plane
+            - deploy-argocd-code-dist-control-plane-config-manager
+
