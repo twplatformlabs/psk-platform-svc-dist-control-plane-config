@@ -1,0 +1,6 @@
+notes.md
+source.env
+bash-scripts.sh
+tpl/cluster-role-binding.yaml
+tpl/cluster-configuration-project.yaml
+tpl/pdb.yaml

@@ -1,2 +1,16 @@
-# psk-platform-svc-dist-control-plane-config
-Bootstrap a platform control plane instance to an Argo Core distributed configuration management repo 
+
+
+
+
+deploy to psk-system, system management service
+
+
+### maintainers
+
+
+add
+        - containerPort: 8081
+          name: probe
+
+
+          to applicationset-controller

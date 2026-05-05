@@ -1,0 +1,86 @@
+# ApplicationSet template for Argo Core bootstrap.
+#
+# ${CLUSTER_ROLE} is substituted at deploy time via envsubst.
+# The resulting ApplicationSet watches roles/<role>/*.yaml in the config repo
+# and generates one Argo Application per file found.
+#
+# Helm values are layered in this order (later wins):
+#   1. Chart defaults (from the upstream chart)
+#   2. defaults/<appName>/values.yaml in the config repo  (org-wide baseline)
+#   3. Inline values: field in the role file              (role-specific overrides)
+#
+# Each roles/<role>/<app>.yaml in psk-aws-control-plane-configuration must provide:
+#
+#   appName:    <string>   # Argo Application name (must be unique per cluster)
+#   namespace:  <string>   # target namespace for the Helm release
+#   repoURL:    <string>   # Helm chart repository URL
+#   chart:      <string>   # Helm chart name
+#   version:    <string>   # Helm chart version (semver or digest)
+#   syncWave:   <string>   # Sync wave integer as a string (e.g. "0", "1", "2")
+#   values:     <string>   # Inline Helm values — role-specific overrides only
+#
+# A defaults/<appName>/values.yaml file MUST exist in the config repo for every
+# application, even if it is empty. The role values: field may be omitted if
+# there are no role-specific overrides beyond the defaults.
+#
+# Example role file:
+#   appName: cert-manager
+#   namespace: cert-manager
+#   repoURL: https://charts.jetstack.io
+#   chart: cert-manager
+#   version: v1.14.5
+#   values: |
+#     installCRDs: true
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-apps
+  namespace: argocd
+spec:
+  # Reconcile every 3 minutes in addition to webhook-triggered syncs
+  syncPolicy:
+    requeueAfterSeconds: 180
+
+  generators:
+    - git:
+        repoURL: https://github.com/twplatformlabs/psk-aws-control-plane-configuration
+        revision: HEAD
+        files:
+          - path: "roles/${CLUSTER_ROLE}/*.yaml"
+
+  template:
+    metadata:
+      name: "{{appName}}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{syncWave}}"
+        argocd.argoproj.io/managed-by-cluster-role: "${CLUSTER_ROLE}"
+    spec:
+      project: default
+
+      # Multiple sources: chart repo + config repo for layered values.
+      # Requires ArgoCD 2.6+. The 'config' ref makes the config repo accessible
+      # to valueFiles in the first source as $config/<path>.
+      sources:
+        - repoURL: "{{repoURL}}"
+          chart: "{{chart}}"
+          targetRevision: "{{version}}"
+          helm:
+            valueFiles:
+              - $config/defaults/{{appName}}/values.yaml
+            values: "{{values}}"
+        - repoURL: https://github.com/twplatformlabs/psk-aws-control-plane-configuration
+          targetRevision: HEAD
+          ref: config
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
