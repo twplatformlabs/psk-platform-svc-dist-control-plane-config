@@ -6,3 +6,4 @@ tpl/cluster-role-binding.yaml
 tpl/cluster-configuration-project.yaml
 tpl/pdb.yaml
 tpl/sbx-i01-aws-us-east-1-configuration.yaml
+tpl/test-configuration.yaml
