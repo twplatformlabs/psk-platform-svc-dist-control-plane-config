@@ -45,11 +45,33 @@ EOF
 
 kubectl apply -f "tpl/test-configuration.yaml"
 
+# wait for the test app-of-app application to be ready
+kubectl wait application/test-configuration -n $argocd_namespace \
+        --for=jsonpath='{.status.sync.status}'=Synced \
+        --timeout=120s
+
+# wait for podinfo to be registered
+until kubectl get application podinfo -n $argocd_namespace &>/dev/null; do
+  echo "  Waiting for podinfo Application to be registered..."
+  sleep 5
+done
+
+# wait for podinfo to be synced and healthy
+kubectl wait application/podinfo \
+  -n $argocd_namespace \
+  --for=jsonpath='{.status.sync.status}'=Synced \
+  --timeout=120s
+kubectl wait application/podinfo \
+  -n $argocd_namespace \
+  --for=jsonpath='{.status.health.status}'=Healthy \
+  --timeout=120s
+
 # wait for the application to be ready
-kubectl rollout status deployment/podinfo -n "$argocd_namespace" --timeout=120s || true
+until kubectl get deployment podinfo -n $argocd_namespace &>/dev/null; do
+  sleep 3
+done
+kubectl rollout status deployment/podinfo -n $argocd_namespace --timeout=120s
 
-
-#===============
 # confirm podinfo test-fixture health
 kubectl port-forward "svc/podinfo" "9898:9898" -n "$argocd_namespace" &>/dev/null &
 PF_PID=$!
