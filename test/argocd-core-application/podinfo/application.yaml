@@ -13,7 +13,7 @@
         targetRevision: 6.11.2
         helm:
           valueFiles:
-            - $config/podinfo/values.yaml
+            - $config/test/argocd-core-application/podinfo/values.yaml
       - repoURL: https://github.com/twplatformlabs/psk-platform-svc-dist-control-plane-config
         targetRevision: HEAD
         ref: config
