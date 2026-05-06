@@ -72,16 +72,16 @@ jobs:
       cluster:
         description: cluster to be configured
         type: string
-      cluster-role:
-        description: cluster role to be configured
-        type: string
     steps:
       - checkout
       - set-environment:
           cluster: << parameters.cluster >>
       - run:
           name: set the cluster role - connecting to role definition in psk-aws-control-plane-configuration
-          command: bash scripts/set_cluster_role.sh << parameters.cluster >> << parameters.cluster-role >>
+          command: bash scripts/set_cluster_role.sh << parameters.cluster >>
+      - run:
+          name: vaidate cluster role application-root reports healthy
+          command: bash scripts/validate_application_root.sh << parameters.cluster >>
 
 workflows:
 
@@ -97,7 +97,6 @@ workflows:
           name: set role as sandbox
           context: *context
           cluster: sbx-i01-aws-us-east-1
-          cluster-role: sandbox
           requires:
             - deploy sandbox cluster configuration manager
           filters: *on-push-main
@@ -114,7 +113,6 @@ workflows:
           name: set role as production
           context: *context
           cluster: prod-i01-aws-us-east-2
-          cluster-role: production
           requires:
             - deploy production cluster configuration manager
           filters: *on-tag-main

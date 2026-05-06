@@ -2,7 +2,7 @@
 set -euo pipefail
 
 cluster_name="$1"
-cluster_role="$2"
+cluster_role=$(jq -er .cluster_role environments/$cluster_name.json)
 argocd_namespace=$(jq -er .argocd_namespace environments/$cluster_name.json)
 config_repo_url=$(jq -er .config_repo_url environments/$cluster_name.json)
 

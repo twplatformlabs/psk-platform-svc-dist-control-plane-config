@@ -1,5 +1,5 @@
 {
-  "cluster_role": "sandbox",
+  "cluster_role": "production",
   "argocd_version": "3.3.7",
   "argocd_namespace": "psk-system",
   "config_repo_url": "https://github.com/twplatformlabs/psk-aws-control-plane-configuration"

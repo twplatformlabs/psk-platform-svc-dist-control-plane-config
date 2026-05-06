@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 # NOTE: not used in the pipeline. This is only for sandbox development and experimentation
 cluster_name="$1"
 cluster_role="$2"
