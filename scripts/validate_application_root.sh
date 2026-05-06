@@ -6,19 +6,11 @@ cluster_role=$(jq -er .cluster_role environments/$cluster_name.json)
 argocd_namespace=$(jq -er .argocd_namespace environments/$cluster_name.json)
 application_root="$cluster_name-configuration"
 
-# Start local ArgoCD API server in background
-argocd admin local-server \
-  --namespace "${argocd_namespace}" \
-  --port 8080 &
-LOCAL_SERVER_PID=$!
+# Set namespace context so core mode works without -n on every command
+kubectl config set-context --current --namespace="${argocd_namespace}"
 
-# Give it a moment to establish connection
-sleep 5
-
-export ARGOCD_SERVER=localhost:8080
-
-# Cleanup on exit
-trap "kill ${LOCAL_SERVER_PID} 2>/dev/null || true" EXIT
+# Login in core mode (spawns local API server transparently per-command)
+argocd login --core
 
 # Now use full argocd CLI as normal
 argocd app wait "${application_root}" \
