@@ -33,6 +33,12 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
 EOF
 
 kubectl apply -f "tpl/$cluster_name-configuration.yaml"

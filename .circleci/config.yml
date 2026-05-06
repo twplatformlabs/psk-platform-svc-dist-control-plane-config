@@ -34,7 +34,6 @@ commands:
           env-file: op.<< parameters.cluster >>.env
       - kube/op-kubeconfig:
           op-value: platform/<< parameters.cluster>>/kubeconfig-base64
-      - do/bash-functions
 
   integration-test:
     description: validate functional health of argocd-core implementation
