@@ -21,3 +21,5 @@ WHen moving to a role-based automated configuration, the individual service and 
 The install script uses the environment defined argocd version value to map to the core menifest file in particular folder. For example, argocd v3.3.7 manifests are in the `argocd-core-manifest-3.3.7` folder.  
 
 To upgrade argocd core, follow the upgrade instructions [here](doc/upgrade-manifeset.md).  
+
+The install script defines an org sa access token. The role configuration registers the configuration repo.  

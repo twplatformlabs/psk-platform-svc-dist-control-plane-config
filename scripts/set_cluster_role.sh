@@ -19,7 +19,7 @@ spec:
 
   source:
     repoURL: $config_repo_url
-    targetRevision: HEAD
+    targetRevision: main
     path: roles/${cluster_role}
     directory:
       recurse: true
