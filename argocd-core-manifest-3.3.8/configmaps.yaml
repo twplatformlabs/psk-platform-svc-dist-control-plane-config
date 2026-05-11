@@ -13,9 +13,9 @@ data:
     jsonPointers:
       - /metadata
       - /subsets
-  # resource.customizations.ignoreResourceUpdates.all: |
-  #   jsonPointers:
-  #     - /status
+  resource.customizations.ignoreResourceUpdates.all: |
+    jsonPointers:
+      - /status
   resource.customizations.ignoreResourceUpdates.apps_ReplicaSet: |
     jqPathExpressions:
       - '.metadata.annotations."deployment.kubernetes.io/desired-replicas"'
@@ -95,6 +95,13 @@ data:
       - BackgroundScanReport
       - ClusterBackgroundScanReport
       - UpdateRequest
+    ### Istio intermediate and reporting resources excluded reduce the number of watched events and improve performance
+    - apiGroups:
+      - networking.istio.io
+      kinds:
+      - "*"
+      clusters:
+      - "*"
 kind: ConfigMap
 metadata:
   labels:
