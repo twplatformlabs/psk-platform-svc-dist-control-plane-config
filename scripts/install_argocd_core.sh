@@ -106,6 +106,7 @@ kubectl rollout status deployment/argocd-redis \
 kubectl rollout status statefulset/argocd-application-controller \
   -n "$argocd_namespace" --timeout=120s || true
 
+# set AppProject for argocd Core managed apps
 cat <<EOF > tpl/cluster-configuration-project.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -131,6 +132,25 @@ spec:
       kind: "*"
 EOF
 kubectl apply -f tpl/cluster-configuration-project.yaml
+
+# deploy sa access token so argocd Core can access the teplatformlabs Org repos
+cat <<EOF > tpl/github-creds-template.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-creds-template
+  namespace: $argocd_namespace
+  labels:
+    argocd.argoproj.io/secret-type: repo-creds
+type: Opaque
+stringData:
+  type: git
+  url: https://github.com/twplatformlabs
+  password: $GH_TOKEN
+  username: twplatformlabs-sa
+EOF
+kubectl apply -f tpl/github-creds-template.yaml
+
 
 
 # if there's reason to switch back to argocd as the deplyment ns, then need to create it
