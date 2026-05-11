@@ -23,7 +23,7 @@ spec:
     path: roles/${cluster_role}
     directory:
       recurse: true
-      include: "application.yaml"
+      include: "**/application.yaml"
 
   destination:
     server: https://kubernetes.default.svc

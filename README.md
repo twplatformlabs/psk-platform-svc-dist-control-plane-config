@@ -6,13 +6,13 @@
 	</p>
 </div>
 
-Deploy argocd core to control plane and set to central 'role-based' configuration repo. The cluster is mapped to a role in an argo app-of-apps cnofiguration repp which maintains all the cluster-level services and extensions.  
+Deploy argocd core to control plane and set to centralized 'role-based' configuration repo. The cluster is mapped to a role in an argo app-of-apps cofiguration repp which maintains all the cluster-level services and extensions.  
 
 This configuration is based on a standard Application definition in order to support enforced syncWave order values.  
 
 The configuration repo is [psk-aws-control-plane-configuration](https://github.com/twplatformlabs/psk-aws-control-plane-configuration)
 
-WHen moving to a role-based automated configuration, the individual service and extension pipelines immediately benedit from a global_env_values variable that dynamicaly roles application upgrades to all clusters and roles. Without this, the individual svc and ext pipelines must each be modified when adding new roles.  
+WHen moving to a role-based automated configuration, the individual service and extension pipelines immediately benefit from a global_env_values variable that dynamicaly roles application upgrades to all clusters and roles. Without this, the individual svc and ext pipelines must each be modified when adding new roles.  
 
 ### maintainers
 
