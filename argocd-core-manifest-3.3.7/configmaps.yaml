@@ -1,6 +1,7 @@
 ---
 apiVersion: v1
 data:
+  application.resourceTrackingMethod: annotation
   resource.customizations.ignoreResourceUpdates.ConfigMap: |
     jqPathExpressions:
       # Ignore the cluster-autoscaler status
