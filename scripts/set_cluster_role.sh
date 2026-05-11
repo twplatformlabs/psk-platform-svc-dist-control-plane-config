@@ -40,5 +40,19 @@ spec:
         factor: 2
         maxDuration: 5m
 EOF
-
 kubectl apply -f "tpl/$cluster_name-configuration.yaml"
+
+cat <<EOF > tpl/register-repo.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: psk-aws-control-plane-configuration-repo
+  namespace: $argocd_namespace
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: git
+  url: https://github.com/twplatformlabs/psk-aws-control-plane-configuration
+EOF
+kubectl apply -f "tpl/register-repo.yaml"
