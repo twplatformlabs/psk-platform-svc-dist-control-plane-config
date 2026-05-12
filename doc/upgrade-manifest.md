@@ -1,8 +1,4 @@
-
-
-
-
-
+## Upgrading the ArgoCD Core manifest deployment
 
 The argocd-core deployment, per the current documentation, recommends using the single-file manifest for deployment. Core deployment is not yet included among the options supported by the Helm charts. However, it also means that we need to pull the manifest and make modifications to support the architecture. In particular, targeting the management-node-group for deployment and including resource assignments and liveness/readiness probes.  
 
