@@ -1,9 +1,9 @@
 version: 2.1
 
 orbs:
-  kube: twdps/kube-ops@2.0.0
+  kube: twdps/kube-ops@2.1.0
   op: twdps/onepassword@3.0.0
-  do: twdps/pipeline-events@5.3.2
+  do: twdps/pipeline-events@5.4.0
 
 globals:
   - &context platform
@@ -83,9 +83,26 @@ jobs:
           name: vaidate cluster role application-root reports healthy
           command: bash scripts/validate_application_root.sh << parameters.cluster >>
 
+  run-integration-test:
+    docker:
+      - image: *executor-image
+    parameters:
+      cluster:
+        description: cluster to be configured
+        type: string
+    steps:
+      - checkout
+      - set-environment:
+          cluster: << parameters.cluster >>
+      - integration-test:
+          cluster: << parameters.cluster >>
+
 workflows:
 
   set sandbox cluster role configuration management:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - deploy argocd-core as configuration manager:
           name: deploy sandbox cluster configuration manager
@@ -116,3 +133,41 @@ workflows:
           requires:
             - deploy production cluster configuration manager
           filters: *on-tag-main
+
+      - do/gh-release:
+          name: generate release notes
+          context: *context
+          notes-from-file: release.md
+          include-commit-msg: true
+          before-release:
+            - op/env:
+                env-file: op.prod-i01-aws-us-east-2.env
+          requires:
+            - set role as production
+          filters: *on-tag-main
+
+      - do/schedule-pipeline:
+          name: schedule nightly integration tests
+          context: *context
+          scheduled-pipeline-name: nightly argocd core integration test
+          scheduled-pipeline-description: |
+            Automatically triggers nightly run of integration-test job
+          hours-of-day: "[1]"
+          days-of-week: "[\"SUN\"]"
+          before-schedule:
+            - op/env:
+                env-file: op.prod-i01-aws-us-east-2.env
+          filters: *on-tag-main
+
+  run nightly integration test:
+    when:
+      equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+    jobs:
+      - run-integration-tests:
+          name: nightly sbx-i01-aws-us-east-1 integration test
+          cluster: sbx-i01-aws-us-east-1
+          context: *context
+      - run-integration-tests:
+          name: nightly prod-i01-aws-us-east-2 integration test
+          cluster: prod-i01-aws-us-east-2
+          context: *context
