@@ -23,3 +23,13 @@ The install script uses the environment defined argocd version value to map to t
 To upgrade argocd core, follow the upgrade instructions [here](doc/upgrade-manifeset.md).  
 
 The install script defines an org sa access token. The role configuration registers the configuration repo.  
+
+**UI access**
+
+```bash
+argocd login --core     # uses current kubeconfig context
+argocd admin dashboard  # then launches a dashboard locally
+
+starting dashboard
+Argo CD UI is available at http://localhost:8080
+```
