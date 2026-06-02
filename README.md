@@ -65,7 +65,7 @@ flowchart LR
     PUSH@{ shape: das, label: "svc or ext pipeline..." }
     TAG@{ shape: das, label: "svc or ext pipeline..." }
 ```
-Ihe individual service or extension pipelines define the complete release pipeline for the application by modifying the respective information in the app-of-apps repo.
+Ihe individual service or extension pipelines define the change release for the application by modifying the respective information in the app-of-apps repo.
 
 Currently the application pipelines also manage integration testing and therefore must be aware of each cluster in order to perform testing. These pipeline would also benefit from creating a central list of clusters by-role where the application pipeline could dynamically generate a parallelized testing pipeline.
 
