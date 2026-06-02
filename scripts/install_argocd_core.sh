@@ -15,7 +15,6 @@ echo "config_repo_url: $config_repo_url"
 # perform trivy scan of chart with install configuration
 trivy config "argocd-core-manifest-${argocd_version}"
 
-# starting at 3.3.7 to goto 3.3.9
 # manifest deploy is documented approach. The offical helm chart will still deploy the server even though it is not needed.
 
 # deploy clusterrolebinding as template, namespace definition is required.
