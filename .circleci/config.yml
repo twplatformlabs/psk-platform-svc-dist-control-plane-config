@@ -163,11 +163,11 @@ workflows:
     when:
       equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
-      - run-integration-tests:
+      - run-integration-test:
           name: nightly sbx-i01-aws-us-east-1 integration test
           cluster: sbx-i01-aws-us-east-1
           context: *context
-      - run-integration-tests:
+      - run-integration-test:
           name: nightly prod-i01-aws-us-east-2 integration test
           cluster: prod-i01-aws-us-east-2
           context: *context
