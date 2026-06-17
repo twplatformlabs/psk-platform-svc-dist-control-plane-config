@@ -21,7 +21,14 @@ argocd app wait "${application_root}" \
 
 # Wait for child apps (app-of-apps pattern)
 argocd app list -o name | grep -v "^${application_root}$" | while read -r child; do
-  argocd app wait "${child}" --sync --health --timeout 300
+  argocd app wait "${child}" --sync --health --operation --core --timeout 300
 done
 
 echo "application resource reports synced and healthy"
+
+trap 'echo "=== FAILURE STATE ==="; \
+  argocd app get otel-daemonset || true; \
+  kubectl -n <otel-namespace> get ds -o wide || true; \
+  kubectl -n <otel-namespace> describe ds <otel-ds-name> || true; \
+  kubectl get nodes -o wide || true; \
+  kubectl -n <otel-namespace> get pods -l <otel-selector> -o wide || true' ERR
