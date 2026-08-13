@@ -16,7 +16,7 @@ title: Role-based configuration management install
 ---
 flowchart LR
 
-    ARGO --> EKS --> | targeting cluster Role | SBX & PROD
+    ARGO --> EKS --> | or | SBX & PROD
     subgraph psk-aws-control-plane-configuration repo
         SBX["/sandbox"]
         PROD["/production"]
@@ -25,7 +25,9 @@ flowchart LR
     EKS@{ shape: procs, label: "EKS Cluster"}
     ARGO@{ shape: brace-r, label: "ArgoCD Core" }
 ```
-The configuration repo is [psk-aws-control-plane-configuration](https://github.com/twplatformlabs/psk-aws-control-plane-configuration) and defines all the services and extensions for the cluster with the specific deployment configuration values.  
+The configuration repo is [psk-aws-control-plane-configuration](https://github.com/twplatformlabs/psk-aws-control-plane-configuration) and defines all the services and extensions for the cluster with the specific deployment configuration valuesby role. The same things are deployed to every role, but with potentially different configuration parameters.  
+
+example: (not the comprehesive list, see the configuration repo for that)  
 ```bash
 roles/
 ├── sandbox/
